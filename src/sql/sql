@@ -1,0 +1,100 @@
+create table member(
+memberseq number not null primary key,
+memberid varchar2(20) not null,
+memberpw varchar2(20) not null,
+memberpwd varchar2(20) not null,
+membername varchar2(10) not null,
+membernick varchar2(20) not null,
+roadAddrPart1 varchar2(100) not null,
+addrDetail varchar2(100) not null,
+jibunAddr varchar2(100) not null,
+zipNo varchar2(100) not null,
+membergender varchar2(4) not null,
+membertel varchar2(15) not null,
+memberyear varchar2(5) not null,
+membermonth varchar2(4) not null,
+memberday varchar2(4) not null,
+memberage varchar2(4) not null,
+memberemail varchar2(50) not null,
+memberreligion varchar2(10),
+membersmok varchar2(10),
+memberjob varchar2(30),
+memberpersonality varchar2(30),
+memberideal varchar2(30),
+membersal number,
+memberblood varchar2(10),
+memberglasses varchar2(15),
+memberschool varchar2(30),
+membercontent varchar2(100)
+);
+
+alter table member add (memgroup number(4),memstep number(4),memindent number(4));
+
+create sequence member_seq;
+
+
+create table dawon_board(
+daid number(4) primary key,
+datitle varchar2(100),
+daname varchar2(20),
+dacontent varchar2(300),
+dadate Date default sysdate,
+dahit number(4) default 0,
+dagroup number(4),
+dastep number(4),
+daindent number(4)
+);
+
+create sequence dawon_board_seq;
+
+create table report_board(
+reid number(4) primary key,
+retitle varchar2(100),
+re_name varchar2(20),
+recontent varchar2(300),
+redate Date default sysdate,
+rehit number(4) default 0,
+regroup number(4),
+restep number(4),
+reindent number(4)
+);
+
+create sequence report_board_seq;
+
+create table note(
+nonum number primary key,
+sendnick varchar2(20),
+takenick varchar2(20),
+title varchar2(50),
+content varchar2(500),
+notedate Date default sysdate,
+notecheck number
+);
+
+
+create sequence note_seq;
+
+create table dawon_faqboard(
+daid number(4) primary key, 
+datitle varchar2(100), 
+daname varchar2(20), 
+dacontent varchar2(300), 
+dadate Date default sysdate 
+);
+
+create sequence dawon_faqboard_seq;
+
+
+create table dawon_inquiryboard(
+daid number(4) primary key,
+datitle varchar2(100),
+daname varchar2(20),
+dacontent varchar2(300),
+dadate Date default sysdate,
+dahit number(4) default 0,
+dagroup number(4),
+dastep number(4),
+daindent number(4)
+);
+
+create sequence dawon_inquiryboard_seq;

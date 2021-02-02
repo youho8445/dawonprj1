@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.main.dao.IDao">
+<sql id="includeCount">
+	<choose>
+		<when test="param2==1">
+		  WHERE (DATITLE LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==2">
+		  WHERE (DACONTENT LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==3">
+		 WHERE (DATITLE LIKE '%' ||  #{param1} || '%' OR DACONTENT LIKE '%' ||  #{param1} || '%')
+		</when>
+		<otherwise>
+			
+		</otherwise>
+	</choose>
+</sql>
+
+<!-- 동적쿼리(list) -->
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+				WHERE (DATITLE LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==2">
+				WHERE (DACONTENT LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==3">
+				WHERE (DATITLE LIKE '%' || #{param3} || '%'
+				OR DACONTENT LIKE '%' || #{param3} || '%')
+			</when>
+			<otherwise>
+
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="free_board" resultType="com.tech.main.dto.BoardDto">
+		SELECT DAID,DATITLE,DANAME,DACONTENT,DADATE,DAHIT,DAGROUP,DASTEP,DAINDENT
+		FROM(SELECT DAID,DATITLE,DANAME,DACONTENT,DADATE,DAHIT,DAGROUP,DASTEP,DAINDENT,
+		ROW_NUMBER() OVER(ORDER BY DAGROUP DESC,DASTEP ASC) DA_SEQ FROM DAWON_BOARD
+		<include refid="includeList" />
+	)
+		WHERE DA_SEQ BETWEEN #{param1} AND #{param2}
+	</select>
+	 <select id="contentView" resultType="com.tech.main.dto.BoardDto">
+		SELECT * FROM DAWON_BOARD
+		WHERE DAID=#{param1}
+	</select>
+	<update id="hitup">
+		UPDATE DAWON_BOARD SET DAHIT=DAHIT+1 WHERE DAID=#{param1}
+	</update>
+	<insert id="write">
+		INSERT INTO
+		DAWON_BOARD(DAID,DATITLE,DANAME,DACONTENT,DAHIT,DAGROUP,
+		DASTEP,DAINDENT) VALUES(DAWON_BOARD_SEQ.NEXTVAL,#{param1},
+		#{param2},#{param3},0,DAWON_BOARD_SEQ.CURRVAL,0,0)
+	</insert>
+	<update id="modify">
+		UPDATE DAWON_BOARD SET
+		DATITLE=#{param2},DANAME=#{param3},
+		DACONTENT=#{param4} WHERE DAID=#{param1}
+	</update>
+	<delete id="delete">
+		DELETE FROM DAWON_BOARD WHERE DAID=#{param1}
+	</delete>
+	<select id="replyView" resultType="com.tech.main.dto.BoardDto">
+		SELECT * FROM DAWON_BOARD WHERE
+		DAID=#{param1}
+	</select>
+	<insert id="reply">
+		INSERT INTO
+		DAWON_BOARD(DAID,DATITLE,DANAME,DACONTENT,DAGROUP,
+		DASTEP,DAINDENT) VALUES(DAWON_BOARD_SEQ.NEXTVAL,#{param1},#{param2},
+		#{param3},#{param4},#{param5}+1,#{param6}+1)
+	</insert>
+	<update id="replyShape">
+		UPDATE DAWON_BOARD SET DASTEP=DASTEP+1
+		WHERE DAGROUP=#{param1} AND DASTEP>#{param2}
+	</update>
+
+	<select id="selectBoard2Count" resultType="Integer">
+		SELECT COUNT(*) FROM
+		DAWON_BOARD
+	</select>
+	
+	<select id="selectBoardCount" resultType="Integer">
+	SELECT  COUNT(*) FROM DAWON_BOARD <include refid="includeCount" />
+	</select>
+	
+	<select id="report_board" resultType="com.tech.main.dto.Re_BoardDto">
+		SELECT REID,RETITLE,RE_NAME,RECONTENT,REDATE,REHIT,REGROUP,RESTEP,REINDENT
+		FROM(SELECT REID,RETITLE,RE_NAME,RECONTENT,REDATE,REHIT,REGROUP,RESTEP,REINDENT,
+		ROW_NUMBER() OVER(ORDER BY REGROUP DESC,RESTEP ASC) RE_SEQ FROM REPORT_BOARD)
+		WHERE RE_SEQ BETWEEN #{param1} AND #{param2}
+	</select>
+	
+	<select id="selectBoard3Count" resultType="Integer">
+		SELECT COUNT(*) FROM
+		REPORT_BOARD
+	</select>
+	<select id="re_contentView" resultType="com.tech.main.dto.Re_BoardDto">
+		SELECT * FROM REPORT_BOARD
+		WHERE REID=#{param1}
+	</select>
+	<insert id="re_write">
+		INSERT INTO
+		REPORT_BOARD(REID,RETITLE,RE_NAME,RECONTENT,REHIT,REGROUP,
+		RESTEP,REINDENT) VALUES(REPORT_BOARD_SEQ.NEXTVAL,'신고합니다.',
+		#{param1},#{param2},0,REPORT_BOARD_SEQ.CURRVAL,0,0)
+	</insert>
+	<select id="re_replyView" resultType="com.tech.main.dto.Re_BoardDto">
+		SELECT * FROM REPORT_BOARD WHERE
+		REID=#{param1}
+	</select>
+	<insert id="re_reply">
+		INSERT INTO
+		REPORT_BOARD(REID,RETITLE,RE_NAME,RECONTENT,REGROUP,
+		RESTEP,REINDENT) VALUES(REPORT_BOARD_SEQ.NEXTVAL,#{param1},#{param2},
+		#{param3},#{param4},#{param5}+1,#{param6}+1)
+	</insert>
+	<update id="re_replyShape">
+		UPDATE REPORT_BOARD SET RESTEP=RESTEP+1
+		WHERE REGROUP=#{param1} AND RESTEP>#{param2}
+	</update>
+	
+
+</mapper>

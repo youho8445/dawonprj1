@@ -1,0 +1,38 @@
+#contents1{
+	width: 700px;
+	background:white;
+	margin: 0 auto;
+	padding: 10px 0;
+	
+}
+#contents2{
+	width:250px;
+	margin:0 auto;
+	padding:0 100px;
+	background:white;
+}
+h1{
+	margin-top:20px;
+	margin-bottom:5px;
+	font-size:large;
+	font-weight:600;
+	color:#ff80c0;
+}
+dl dt {
+	border-left:5px solid #ff80c0;
+	border-bottom:1px solid #ff80c0;
+	font-size:small;
+	margin: 0 5px 5px 5px;
+	padding: 5px;
+}
+dl dt span{
+	color: #ff80c0;
+	font-weight:bold;
+	
+}
+dl dd{
+	font-size: 15px;
+	margin-left: 10px;
+	padding: 0 10px;
+}
+

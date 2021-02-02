@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tech.main.dao.FaqDao">
+<sql id="includeCount">
+	<choose>
+		<when test="param2==1">
+		  WHERE (DATITLE LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==2">
+		  WHERE (DACONTENT LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==3">
+		 WHERE (DATITLE LIKE '%' ||  #{param1} || '%' OR DACONTENT LIKE '%' ||  #{param1} || '%')
+		</when>
+		<otherwise>
+			
+		</otherwise>
+	</choose>
+</sql>
+
+<!-- 동적쿼리(list) -->
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+				WHERE (DATITLE LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==2">
+				WHERE (DACONTENT LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==3">
+				WHERE (DATITLE LIKE '%' || #{param3} || '%'
+				OR DACONTENT LIKE '%' || #{param3} || '%')
+			</when>
+			<otherwise>
+
+			</otherwise>
+		</choose>
+	</sql>
+<select id="selectBoard2Count" resultType="Integer">
+		SELECT COUNT(*) FROM
+		DAWON_FAQBOARD
+	</select>
+
+	<select id="selectBoardCount" resultType="Integer">
+		SELECT COUNT(*) FROM DAWON_FAQBOARD
+		<include refid="includeCount" />
+	</select>
+	
+	<select id="inquiry" resultType="com.tech.main.dto.InquiryboardDto">
+		SELECT
+		DAID,DATITLE,DANAME,DACONTENT,DADATE,DAHIT,DAGROUP,DASTEP,DAINDENT
+		FROM(SELECT
+		DAID,DATITLE,DANAME,DACONTENT,DADATE,DAHIT,DAGROUP,DASTEP,DAINDENT,
+		ROW_NUMBER() OVER(ORDER BY DAGROUP DESC,DASTEP ASC) DA_INQUIRYSEQ FROM
+		DAWON_INQUIRYBOARD
+		<include refid="includeList" />
+		)
+		WHERE DA_INQUIRYSEQ BETWEEN #{param1} AND #{param2}
+	</select>
+	<select id="InquiryView" resultType="com.tech.main.dto.InquiryboardDto">
+		SELECT * FROM DAWON_INQUIRYBOARD
+		WHERE DAID=#{param1}
+	</select>
+
+	<insert id="Inquirywrite">
+		INSERT INTO
+		DAWON_INQUIRYBOARD(DAID,DATITLE,DANAME,DACONTENT,DAHIT,DAGROUP,
+		DASTEP,DAINDENT) VALUES(DAWON_INQUIRYBOARD_SEQ.NEXTVAL,#{param1},
+		#{param2},#{param3},0,DAWON_INQUIRYBOARD_SEQ.CURRVAL,0,0)
+	</insert>
+	<update id="Inquirymodify">
+		UPDATE DAWON_INQUIRYBOARD SET
+		DATITLE=#{param2},DANAME=#{param3},
+		DACONTENT=#{param4} WHERE
+		DAID=#{param1}
+	</update>
+	<delete id="Inquirydelete">
+		DELETE FROM DAWON_INQUIRYBOARD WHERE DAID=#{param1}
+	</delete>
+	<select id="InquiryReplyView" resultType="com.tech.main.dto.InquiryboardDto">
+		SELECT * FROM DAWON_INQUIRYBOARD
+		WHERE
+		DAID=#{param1}
+	</select>
+	<insert id="InquiryReply">
+		INSERT INTO
+		DAWON_INQUIRYBOARD(DAID,DATITLE,DANAME,DACONTENT,DAGROUP,
+		DASTEP,DAINDENT)
+		VALUES(DAWON_INQUIRYBOARD_SEQ.NEXTVAL,#{param1},#{param2},
+		#{param3},#{param4},#{param5}+1,#{param6}+1)
+	</insert>
+	<update id="InquiryReplyShape">
+		UPDATE DAWON_INQUIRYBOARD SET DASTEP=DASTEP+1
+		WHERE
+		DAGROUP=#{param1} AND DASTEP>#{param2}
+	</update>
+
+	<select id="InquirySelectBoard2Count" resultType="Integer">
+		SELECT COUNT(*) FROM
+		DAWON_INQUIRYBOARD
+	</select>
+
+	<select id="InquirySelectBoardCount" resultType="Integer">
+		SELECT COUNT(*) FROM DAWON_INQUIRYBOARD
+		<include refid="includeCount" />
+	</select>
+
+</mapper>

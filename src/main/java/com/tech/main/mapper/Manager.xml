@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.tech.main.dao.ManagerDao">
+    <sql id="includeCount">
+	<choose>
+		<when test="param2==1">
+		  WHERE (MEMBERID LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==2">
+		  WHERE (MEMBERNICK LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==3">
+		 WHERE (MEMBERID LIKE '%' ||  #{param1} || '%' OR MEMBERNICK LIKE '%' ||  #{param1} || '%')
+		</when>
+		<otherwise>
+			
+		</otherwise>
+	</choose>
+</sql>
+
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+				WHERE (MEMBERID LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==2">
+				WHERE (MEMBERNICK LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==3">
+				WHERE (MEMBERID LIKE '%' || #{param3} || '%'
+				OR MEMBERNICK LIKE '%' || #{param3} || '%')
+			</when>
+			<otherwise>
+
+			</otherwise>
+		</choose>
+	</sql>
+    <select id="memberlist" resultType="com.tech.main.dto.JoinDto">
+    SELECT MEMBERID,MEMBERNICK,MEMBERGENDER,MEMBERAGE,MEMBERSEQ,MEMGROUP,MEMSTEP,MEMINDENT 
+    FROM(SELECT MEMBERID,MEMBERNICK,MEMBERGENDER,MEMBERAGE,MEMBERSEQ,MEMGROUP,MEMSTEP,MEMINDENT,
+    ROW_NUMBER() OVER(ORDER BY MEMGROUP DESC,MEMSTEP ASC) MEM_SEQ FROM MEMBER
+    <include refid="includeList" />
+    )
+    WHERE MEM_SEQ BETWEEN #{param1} AND #{param2}
+    </select>
+    
+    <select id="selectBoardCount" resultType="Integer">
+	SELECT  COUNT(*) FROM MEMBER <include refid="includeCount" />
+	</select>
+    <delete id="managerdel">
+	DELETE FROM MEMBER WHERE MEMBERSEQ=#{param1}
+	</delete>
+	<select  id="info" resultType="com.tech.main.dto.JoinDto">
+	SELECT MEMBERID,MEMBERNICK,MEMBERNAME,ROADADDRPART1,ADDRDETAIL,MEMBERGENDER,MEMBERTEL,MEMBERYEAR,MEMBERMONTH,
+	MEMBERDAY,MEMBERAGE,MEMBEREMAIL,MEMBERRELIGION,MEMBERSMOK,MEMBERJOB,MEMBERPERSONALITY,MEMBERIDEAL,
+	MEMBERSAL,MEMBERBLOOD,MEMBERGLASSES,MEMBERSCHOOL,MEMBERCONTENT,FILESRC FROM MEMBER WHERE MEMBERID=#{param1}
+	</select>
+	
+    </mapper>

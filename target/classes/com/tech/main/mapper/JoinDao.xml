@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tech.main.dao.JoinIDao">
+	<insert id="joinwrite">
+		INSERT INTO
+		MEMBER(MEMBERSEQ,MEMBERID,MEMBERPW,MEMBERPWD,MEMBERNICK,MEMBERNAME,ROADADDRPART1,ADDRDETAIL,JIBUNADDR,ZIPNO,MEMBERGENDER,MEMBERTEL,MEMBERYEAR,MEMBERMONTH,MEMBERDAY,MEMBERAGE,MEMBEREMAIL,MEMBERRELIGION,MEMBERSMOK,MEMBERJOB,MEMBERPERSONALITY,MEMBERIDEAL,MEMBERSAL,MEMBERBLOOD,MEMBERGLASSES,MEMBERSCHOOL,MEMBERCONTENT,MEMGROUP,MEMSTEP,MEMINDENT)
+		VALUES(MEMBER_SEQ.NEXTVAL,#{param1},#{param2},#{param3},#{param4},#{param5},#{param6},#{param7},#{param8},#{param9},#{param10},#{param11},
+		#{param12},#{param13},#{param14},#{param15},#{param16},#{param17},#{param18},#{param19},#{param20},#{param21},#{param22},#{param23},#{param24},#{param25},MEMBER_SEQ.CURRVAL,0,0,#{param26})
+	</insert>
+	<update id="fileproc" >
+	UPDATE MEMBER SET MEMBERNICK=#{param2},MEMBERRELIGION=#{param3},MEMBERSMOK=#{param4},MEMBERJOB=#{param5},
+	MEMBERPERSONALITY=#{param6},MEMBERIDEAL=#{param7},MEMBERSAL=#{param8},MEMBERBLOOD=#{param9},MEMBERGLASSES=#{param10},MEMBERSCHOOL=#{param11},MEMBERCONTENT=#{param12},FILESRC=#{param13} WHERE MEMBERID=#{param1}
+	
+	</update>
+	<select id="proview" resultType="com.tech.main.dto.JoinDto">
+		SELECT MEMBERID,MEMBERNICK,MEMBERRELIGION,MEMBERSMOK,MEMBERJOB,MEMBERPERSONALITY,MEMBERIDEAL,MEMBERSAL,MEMBERBLOOD,MEMBERGLASSES,MEMBERSCHOOL,MEMBERCONTENT FROM MEMBER WHERE MEMBERID=#{param1}
+	</select>
+	<select  id="hompy" resultType="com.tech.main.dto.JoinDto">
+	SELECT MEMBERID,MEMBERNICK,MEMBERRELIGION,MEMBERSMOK,MEMBERJOB,MEMBERPERSONALITY,MEMBERIDEAL,MEMBERSAL,MEMBERBLOOD,MEMBERGLASSES,MEMBERSCHOOL,MEMBERCONTENT,FILESRC FROM MEMBER WHERE MEMBERID=#{param1}
+	</select>
+	<delete id="memderpro">
+	DELETE FROM MEMBER WHERE MEMBERID=#{param1}
+	</delete>
+	
+	<update id="setpw">
+	UPDATE MEMBER SET MEMBERPW=#{param2},MEMBERPWD=#{param3} WHERE MEMBERID=#{param1}
+	</update>
+	
+	<!-- <select id="ITview" resultType="com.tech.main.dto.JoinDto">
+		SELECT MEMBERNICK,MEMBERGENDER,MEMBERAGE,SUBSTR(ROADADDRPART1, 1, 6) ROADADDRPART1,MEMBERJOB FROM MEMBER
+		ORDER BY MEMBERSEQ DESC
+	</select> -->
+	
+	<sql id="includeCount">
+	<choose>
+		<when test="param2==1">
+		  WHERE (MEMBERAGE LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==2">
+		  WHERE (ROADADDRPART1 LIKE '%' ||  #{param1} || '%')
+		</when>
+		<when test="param2==3">
+		 WHERE (MEMBERAGE LIKE '%' ||  #{param1} || '%' OR ROADADDRPART1 LIKE '%' ||  #{param1} || '%')
+		</when>
+		<otherwise>
+			
+		</otherwise>
+	</choose>
+</sql>
+
+<!-- 동적쿼리(list) -->
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+				WHERE (MEMBERAGE LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==2">
+				WHERE (ROADADDRPART1 LIKE '%' || #{param3} || '%')
+			</when>
+			<when test="param4==3">
+				WHERE (MEMBERAGE LIKE '%' || #{param3} || '%'
+				OR ROADADDRPART1 LIKE '%' || #{param3} || '%')
+			</when>
+			<otherwise>
+
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="type_board" resultType="com.tech.main.dto.JoinDto">
+		SELECT FILESRC,MEMBERID,MEMBERNICK,MEMBERGENDER,MEMBERAGE,SUBSTR(ROADADDRPART1, 1, 6) ROADADDRPART1,MEMBERJOB,MEMGROUP,MEMSTEP,MEMINDENT 
+		FROM(SELECT FILESRC,MEMBERID,MEMBERNICK,MEMBERGENDER,MEMBERAGE,SUBSTR(ROADADDRPART1, 1, 6) ROADADDRPART1,MEMBERJOB,MEMGROUP,MEMSTEP,MEMINDENT,
+		ROW_NUMBER() OVER(ORDER BY MEMGROUP DESC,MEMSTEP ASC) MEMBER_SEQ FROM MEMBER
+		<include refid="includeList" />
+	)
+		WHERE MEMBER_SEQ BETWEEN #{param1} AND #{param2}
+	</select>
+	
+	<select id="selectBoardCount" resultType="Integer">
+	SELECT  COUNT(*) FROM MEMBER <include refid="includeCount" />
+	</select>
+	
+	<select  id="checkid" resultType="Integer">
+	SELECT COUNT(*) FROM MEMBER WHERE MEMBERID LIKE #{param1}
+	</select>
+	
+	<select  id="checknick" resultType="Integer">
+	SELECT COUNT(*) FROM MEMBER WHERE MEMBERNICK LIKE #{param1}
+	</select>
+		<!-- 쪽지전송 -->
+	<insert id="send">
+	INSERT INTO NOTE(NONUM,SENDNICK,TAKENICK,TITLE,CONTENT,NOTECHECK)
+	VALUES(NOTE_SEQ.NEXTVAL,#{param2},#{param3},#{param4},#{param5},0)
+	</insert>
+			<!-- 쪽지보관함 -->
+	<select id="notebox" resultType="com.tech.main.dto.NoteDto">
+	SELECT NONUM,SENDNICK,TAKENICK,TITLE,CONTENT,NOTEDATE,NOTECHECK 
+	FROM NOTE WHERE TAKENICK=#{param1}
+	</select>
+		<!-- 쪽지보관함 리스트 -->
+	<select id="take"  resultType="com.tech.main.dto.NoteDto" >
+	SELECT NONUM,SENDNICK,TAKENICK,TITLE,CONTENT,NOTEDATE,NOTECHECK FROM NOTE WHERE NONUM=#{param1}
+	</select> 
+	<!-- 쪽지 삭제 -->
+	<delete id="delnote">
+	DELETE FROM NOTE WHERE NONUM=#{param1}
+	</delete>
+		<!-- 쪽지보관함 리스트 -->
+	<select  id="replysend" resultType="com.tech.main.dto.NoteDto">
+	SELECT * FROM NOTE WHERE NONUM=#{param1}
+	</select>
+		<!-- 답장보내기 -->
+	<insert id="replysendnote">
+	INSERT INTO NOTE(NONUM,SENDNICK,TAKENICK,TITLE,CONTENT,NOTECHECK)
+	VALUES(NOTE_SEQ.NEXTVAL,#{param2},#{param3},#{param4},#{param5},0)
+	</insert>
+</mapper>
